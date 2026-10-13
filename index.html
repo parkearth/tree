@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f6b4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="空樹穴填報">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>空樹穴填報</title>
+<style>
+/* 戶外使用：高對比、大按鈕、單欄表單；下方固定分頁列 */
+:root{
+  --bg:#f3f5f2; --panel:#fff; --ink:#18241e; --muted:#5b6a62; --line:#d5ddd8;
+  --pine:#1f6b4a; --pine-ink:#fff; --warn:#c2410c; --ok:#1f6b4a; --pend:#b07d05; --chip:#e9eee9;
+  --f:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#111714; --panel:#1a221e; --ink:#e4ece7; --muted:#9aa9a1; --line:#2d3933;
+  --pine:#4fb886; --pine-ink:#0d1a13; --warn:#ff8a4c; --ok:#4fb886; --pend:#e7b93e; --chip:#24302a; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:5;background:var(--pine);color:var(--pine-ink);padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+header h1{font-size:18px;margin:0;font-weight:700}
+.net{font-size:12.5px;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.18);white-space:nowrap}
+.net.off{background:var(--warn);color:#fff}
+main{max-width:640px;margin:0 auto;padding:14px 16px calc(90px + env(safe-area-inset-bottom,0px))}
+.view{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+label.f{display:block;font-weight:700;margin-bottom:6px}
+label.f small{font-weight:400;color:var(--muted);margin-left:4px}
+.req::after{content:" *";color:var(--warn)}
+select,input[type=text],input[type=url],input[type=password],textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+textarea{min-height:76px;resize:vertical}
+:focus-visible{outline:3px solid var(--pine);outline-offset:2px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;border:0;border-radius:8px;padding:12px 16px;background:var(--pine);color:var(--pine-ink);cursor:pointer;min-height:48px}
+.btn.ghost{background:transparent;color:var(--pine);border:1.5px solid var(--pine)}
+.btn.small{padding:7px 12px;min-height:36px;font-size:14px}
+.btn.danger{background:transparent;color:var(--warn);border:1.5px solid var(--warn)}
+.btn:disabled{opacity:.5}
+.btn.block{width:100%}
+.hint{font-size:13.5px;color:var(--muted);margin-top:6px}
+.types{display:flex;flex-direction:column;gap:8px}
+.types label{display:flex;gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:8px;padding:12px;cursor:pointer;background:var(--bg)}
+.types input{width:22px;height:22px;accent-color:var(--pine)}
+.types label:has(input:checked){border-color:var(--pine);background:var(--chip);font-weight:700}
+.photo{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;align-items:center}
+.thumb{width:110px;height:110px;border-radius:8px;border:1.5px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:13px;overflow:hidden;background:var(--bg)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.filebtn{position:relative;overflow:hidden;display:inline-flex}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.coords{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(80px + env(safe-area-inset-bottom,0px));max-width:600px;margin:0 auto;background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:8px;z-index:20;font-size:15px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding-bottom:env(safe-area-inset-bottom,0px);z-index:10}
+nav.tabs button{font:inherit;font-size:14px;background:none;border:0;color:var(--muted);padding:10px 4px 12px;cursor:pointer;position:relative}
+nav.tabs button[aria-selected=true]{color:var(--pine);font-weight:700;box-shadow:inset 0 3px 0 var(--pine)}
+.badge{display:inline-block;min-width:20px;padding:0 6px;border-radius:999px;background:var(--warn);color:#fff;font-size:12px;margin-left:4px}
+.rec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.rec:last-child{border-bottom:0}
+.rec .t{font-weight:700}
+.rec .s{font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+.st{font-size:12.5px;font-weight:700;white-space:nowrap}
+.st.ok{color:var(--ok)} .st.pend{color:var(--pend)} .st.err{color:var(--warn)}
+.acts{grid-column:1/3;display:flex;gap:8px;flex-wrap:wrap}
+h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>空樹穴巡查填報</h1>
+  <span class="net" id="net">連線中</span>
+</header>
+
+<main>
+  <!-- 填報 -->
+  <section class="view" id="v-form">
+    <form id="form" class="view" novalidate>
+      <div class="card">
+        <label class="f req" for="dist">行政區</label>
+        <select id="dist" required>
+          <option value="">請選擇</option>
+          <option>大同區</option><option>中山區</option><option>中正區</option><option>萬華區</option>
+          <option>大安區</option><option>信義區</option><option>松山區</option><option>內湖區</option>
+          <option>南港區</option><option>文山區</option><option>士林區</option><option>北投區</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <label class="f req" for="address">位置（詳細地址）</label>
+        <textarea id="address" rows="2" placeholder="例：臺北市大同區太原路 22 號前人行道" required></textarea>
+        <div class="row" style="margin-top:8px">
+          <button type="button" class="btn ghost small" id="locate">定位並帶入地址</button>
+          <span class="coords" id="coords"></span>
+        </div>
+        <div class="hint" id="locHint">在現場按「定位」，會記下座標並自動帶入最近門牌，請再補上方位（如「前人行道」）。</div>
+      </div>
+
+      <div class="card">
+        <span class="f req" style="display:block;font-weight:700;margin-bottom:6px">缺失種類</span>
+        <div class="types" id="types">
+          <label><input type="radio" name="type" value="空樹穴且未立告示牌" checked> 空樹穴且未立告示牌</label>
+          <label><input type="radio" name="type" value="廢樹頭且未立告牌"> 廢樹頭且未立告牌</label>
+          <label><input type="radio" name="type" value="舊告示牌未撤除"> 舊告示牌未撤除</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="f req" style="display:block;font-weight:700;margin-bottom:8px">缺失照片</span>
+        <div class="photo">
+          <div class="thumb" id="thBad">尚未拍照</div>
+          <div class="view" style="gap:6px">
+            <span class="btn filebtn">拍照 / 選照片<input type="file" id="pBad" accept="image/*" capture="environment" aria-label="缺失照片"></span>
+            <button type="button" class="btn ghost small" id="xBad" hidden>移除</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="f" style="display:block;font-weight:700;margin-bottom:8px">改善照片 <small style="font-weight:400;color:var(--muted)">選填，改善後可在「紀錄」補傳</small></span>
+        <div class="photo">
+          <div class="thumb" id="thFix">無</div>
+          <div class="view" style="gap:6px">
+            <span class="btn ghost filebtn">拍照 / 選照片<input type="file" id="pFix" accept="image/*" capture="environment" aria-label="改善照片"></span>
+            <button type="button" class="btn ghost small" id="xFix" hidden>移除</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card view" style="gap:12px">
+        <div>
+          <label class="f" for="holeId">樹穴編號 <small>選填，巡查圖上的編號</small></label>
+          <input type="text" id="holeId" inputmode="numeric" placeholder="例：48281">
+        </div>
+        <div>
+          <label class="f" for="remark">備註</label>
+          <textarea id="remark" rows="2" placeholder="例：樹穴已填平、告示牌倒地"></textarea>
+        </div>
+        <div>
+          <label class="f" for="reporter">填報人 <small>會記住，下次自動帶入</small></label>
+          <input type="text" id="reporter" placeholder="姓名">
+        </div>
+      </div>
+
+      <button type="submit" class="btn block" id="submit">送出</button>
+      <div class="hint" style="text-align:center">沒有網路也能送出，會先存在手機，有網路時自動上傳。</div>
+    </form>
+  </section>
+
+  <!-- 紀錄 -->
+  <section class="view" id="v-list" hidden>
+    <div class="card">
+      <h2>待上傳 <button class="btn small" id="syncNow" type="button">立即上傳</button></h2>
+      <div id="pending"></div>
+    </div>
+    <div class="card">
+      <h2>表內缺失・補改善照片 <button class="btn ghost small" id="reload" type="button">重新整理</button></h2>
+      <div class="hint" style="margin-top:0">讀取雲端試算表內最近 50 筆，含其他組員填報的。</div>
+      <div id="remote"><div class="empty">切換到此頁時讀取。</div></div>
+      <input type="file" id="pImprove" accept="image/*" capture="environment" hidden>
+    </div>
+  </section>
+
+  <!-- 設定 -->
+  <section class="view" id="v-set" hidden>
+    <div class="card view" style="gap:12px">
+      <div>
+        <label class="f" for="gasUrl">GAS 網頁應用程式網址</label>
+        <input type="url" id="gasUrl" placeholder="https://script.google.com/macros/s/…/exec">
+      </div>
+      <div>
+        <label class="f" for="token">通行碼</label>
+        <input type="password" id="token" autocomplete="off">
+      </div>
+      <div class="row">
+        <button class="btn" type="button" id="saveSet">儲存</button>
+        <button class="btn ghost" type="button" id="testSet">測試連線</button>
+      </div>
+      <div class="hint" id="setMsg"></div>
+    </div>
+    <div class="card hint" style="margin:0">
+      照片會先在手機壓縮成長邊 1600 像素再上傳，存在雲端硬碟「空樹穴巡查照片」資料夾，試算表的照片欄會直接顯示縮圖。<br>
+      版本 1.0
+    </div>
+  </section>
+</main>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-v="form" aria-selected="true">填報</button>
+  <button role="tab" data-v="list" aria-selected="false">紀錄<span class="badge" id="badge" hidden>0</span></button>
+  <button role="tab" data-v="set" aria-selected="false">設定</button>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+/* ===== 預設設定（部署前改這裡；使用者也可在「設定」頁覆蓋） ===== */
+const DEFAULTS = {
+  GAS_URL: '',            // 例：https://script.google.com/macros/s/XXXX/exec
+  TOKEN: 'treepit2026',
+};
+
+const $ = id => document.getElementById(id);
+const LS = {
+  get(k, d){ try { const v = localStorage.getItem('tp_' + k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem('tp_' + k, JSON.stringify(v)); } catch(e){} }
+};
+const cfg = () => ({ url: LS.get('gasUrl', DEFAULTS.GAS_URL), token: LS.get('token', DEFAULTS.TOKEN) });
+
+function toast(msg, ms = 3200){ const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, ms); }
+
+/* ===== IndexedDB 佇列 ===== */
+const DB = {
+  db: null,
+  open(){ return this.db ? Promise.resolve(this.db) : new Promise((res, rej) => {
+    const r = indexedDB.open('treepit', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('queue', { keyPath: 'uid' });
+    r.onsuccess = () => res(this.db = r.result); r.onerror = () => rej(r.error);
+  }); },
+  async tx(mode, fn){ const db = await this.open(); return new Promise((res, rej) => {
+    const t = db.transaction('queue', mode), s = t.objectStore('queue'); const out = fn(s);
+    t.oncomplete = () => res(out && out.result !== undefined ? out.result : undefined); t.onerror = () => rej(t.error);
+  }); },
+  put(o){ return this.tx('readwrite', s => s.put(o)); },
+  del(k){ return this.tx('readwrite', s => s.delete(k)); },
+  all(){ return this.tx('readonly', s => s.getAll()); },
+};
+
+/* ===== 照片壓縮 ===== */
+async function compress(file, max = 1600, q = 0.82){
+  let bmp;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch(e){ bmp = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); }); }
+  const w = bmp.width, h = bmp.height, s = Math.min(1, max / Math.max(w, h));
+  const c = document.createElement('canvas'); c.width = Math.round(w * s); c.height = Math.round(h * s);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', q);
+}
+
+/* ===== 表單 ===== */
+const photos = { bad: null, fix: null };
+let loc = null;
+
+function bindPhoto(inputId, thumbId, clearId, key, emptyText){
+  $(inputId).addEventListener('change', async e => {
+    const f = e.target.files[0]; if (!f) return;
+    $(thumbId).textContent = '處理中…';
+    try { photos[key] = await compress(f); $(thumbId).innerHTML = `<img alt="" src="${photos[key]}">`; $(clearId).hidden = false; }
+    catch(err){ $(thumbId).textContent = emptyText; toast('照片讀取失敗，請換一張再試'); }
+    e.target.value = '';
+  });
+  $(clearId).addEventListener('click', () => { photos[key] = null; $(thumbId).textContent = emptyText; $(clearId).hidden = true; });
+}
+bindPhoto('pBad', 'thBad', 'xBad', 'bad', '尚未拍照');
+bindPhoto('pFix', 'thFix', 'xFix', 'fix', '無');
+
+$('dist').value = LS.get('dist', '');
+$('reporter').value = LS.get('reporter', '');
+
+/* 從巡查圖帶參數開啟：?hole=48281&dist=大同區&lat=..&lng=.. */
+(() => {
+  const q = new URLSearchParams(location.search);
+  if (q.get('hole')) $('holeId').value = q.get('hole');
+  if (q.get('dist')) $('dist').value = q.get('dist');
+  if (q.get('lat') && q.get('lng')){ loc = { lat: +q.get('lat'), lng: +q.get('lng') }; $('coords').textContent = `${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}（巡查圖）`; }
+})();
+
+$('locate').addEventListener('click', () => {
+  if (!navigator.geolocation){ toast('這支手機的瀏覽器不支援定位'); return; }
+  $('locate').disabled = true; $('locHint').textContent = '定位中…';
+  navigator.geolocation.getCurrentPosition(async p => {
+    loc = { lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy) };
+    $('coords').textContent = `${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}（±${loc.acc} m）`;
+    $('locate').disabled = false;
+    const { url, token } = cfg();
+    if (!url || !navigator.onLine){ $('locHint').textContent = '已記下座標。目前無法查地址，請手動輸入。'; return; }
+    $('locHint').textContent = '查詢地址中…';
+    try {
+      const r = await fetch(`${url}?action=reverse&lat=${loc.lat}&lng=${loc.lng}&token=${encodeURIComponent(token)}`).then(r => r.json());
+      if (r.ok && r.address){
+        if (!$('address').value.trim() || $('address').dataset.auto === '1'){ $('address').value = r.address; $('address').dataset.auto = '1'; }
+        $('locHint').textContent = '已帶入最近門牌，請補上方位（如「前人行道」）。';
+        if (!$('dist').value){ const m = r.address.match(/(\S{2}區)/); if (m) $('dist').value = m[1]; }
+      } else $('locHint').textContent = r.error || '查不到地址，請手動輸入。';
+    } catch(e){ $('locHint').textContent = '查詢地址失敗，請手動輸入。'; }
+  }, err => {
+    $('locate').disabled = false;
+    $('locHint').textContent = err.code === 1 ? '定位權限被拒絕，請到瀏覽器設定允許定位，或手動輸入地址。' : '定位失敗，請到開闊處再試，或手動輸入地址。';
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+});
+$('address').addEventListener('input', () => { $('address').dataset.auto = '0'; });
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const dist = $('dist').value, address = $('address').value.trim(), type = (document.querySelector('input[name=type]:checked') || {}).value;
+  if (!dist){ toast('請選擇行政區'); $('dist').focus(); return; }
+  if (!address){ toast('請填寫位置'); $('address').focus(); return; }
+  if (!photos.bad){ toast('請拍缺失照片'); return; }
+  LS.set('dist', dist); LS.set('reporter', $('reporter').value.trim());
+  const rec = {
+    uid: (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2)),
+    createdAt: Date.now(), action: 'submit', status: 'pending',
+    dist, address, type, holeId: $('holeId').value.trim(), remark: $('remark').value.trim(), reporter: $('reporter').value.trim(),
+    lat: loc ? loc.lat : '', lng: loc ? loc.lng : '', photoBad: photos.bad, photoFix: photos.fix,
+  };
+  await DB.put(rec);
+  // 清空表單（保留行政區、填報人）
+  $('address').value = ''; $('holeId').value = ''; $('remark').value = ''; loc = null; $('coords').textContent = '';
+  $('xBad').click(); $('xFix').click();
+  history.replaceState(null, '', location.pathname);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast(navigator.onLine ? '已送出，上傳中…' : '已存在手機，有網路時自動上傳');
+  refreshBadge(); sync();
+});
+
+/* ===== 上傳 ===== */
+let syncing = false;
+async function post(body){
+  const { url, token } = cfg();
+  if (!url) throw new Error('尚未設定 GAS 網址，請到「設定」頁填寫');
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ token }, body)) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || '上傳失敗');
+  return j;
+}
+async function sync(){
+  if (syncing || !navigator.onLine) return;
+  syncing = true;
+  try {
+    const items = (await DB.all()).filter(r => r.status !== 'done').sort((a, b) => a.createdAt - b.createdAt);
+    for (const r of items){
+      try {
+        const res = await post(r);
+        await DB.del(r.uid);
+        const hist = LS.get('history', []); hist.unshift({ uid: r.uid, serial: res.serial, dist: r.dist, address: r.address, type: r.type, at: r.createdAt, action: r.action });
+        LS.set('history', hist.slice(0, 100));
+        toast(r.action === 'improve' ? `序號 ${res.serial} 改善照片已上傳` : `已寫入缺失表，序號 ${res.serial}`);
+      } catch(err){
+        r.status = 'error'; r.error = String(err.message || err); await DB.put(r);
+        if (/網址|通行碼/.test(r.error)) { toast(r.error, 5000); break; }
+      }
+    }
+  } finally { syncing = false; refreshBadge(); if (!$('v-list').hidden) renderPending(); }
+}
+
+async function refreshBadge(){
+  const n = (await DB.all()).length;
+  $('badge').textContent = n; $('badge').hidden = n === 0;
+}
+
+function fmtTime(t){ const d = new Date(t); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+async function renderPending(){
+  const items = (await DB.all()).sort((a, b) => b.createdAt - a.createdAt);
+  const box = $('pending');
+  if (!items.length){
+    const hist = LS.get('history', []).slice(0, 5);
+    box.innerHTML = '<div class="empty">沒有待上傳的資料。</div>' + (hist.length ? '<div class="hint">最近上傳：' + hist.map(h => `序號 ${esc(h.serial)}${h.action==='improve'?'（改善）':''}`).join('、') + '</div>' : '');
+    return;
+  }
+  box.innerHTML = items.map(r => `<div class="rec">
+    <div><div class="t">${r.action === 'improve' ? '補改善照片・序號 ' + esc(r.serial) : esc(r.dist) + '・' + esc(r.type)}</div>
+      <div class="s">${esc(r.address || '')} ${fmtTime(r.createdAt)}</div>
+      ${r.error ? `<div class="s" style="color:var(--warn)">${esc(r.error)}</div>` : ''}</div>
+    <span class="st ${r.status === 'error' ? 'err' : 'pend'}">${r.status === 'error' ? '失敗' : '等待中'}</span>
+    <div class="acts"><button class="btn danger small" data-del="${r.uid}" type="button">刪除</button></div>
+  </div>`).join('');
+}
+$('pending').addEventListener('click', async e => {
+  const b = e.target.closest('[data-del]'); if (!b) return;
+  if (b.dataset.armed !== '1'){ b.dataset.armed = '1'; b.textContent = '再按一次刪除'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '刪除'; }, 3000); return; }
+  await DB.del(b.dataset.del); renderPending(); refreshBadge();
+});
+$('syncNow').addEventListener('click', async () => {
+  if (!navigator.onLine){ toast('目前沒有網路'); return; }
+  for (const r of await DB.all()){ if (r.status === 'error'){ r.status = 'pending'; delete r.error; await DB.put(r); } }
+  sync();
+});
+
+/* ===== 雲端清單與補改善照片 ===== */
+let improveSerial = null;
+async function loadRemote(){
+  const box = $('remote'), { url, token } = cfg();
+  if (!url){ box.innerHTML = '<div class="empty">請先到「設定」填寫 GAS 網址。</div>'; return; }
+  if (!navigator.onLine){ box.innerHTML = '<div class="empty">目前沒有網路，無法讀取雲端清單。</div>'; return; }
+  box.innerHTML = '<div class="empty">讀取中…</div>';
+  try {
+    const r = await fetch(`${url}?action=list&limit=50&token=${encodeURIComponent(token)}`).then(r => r.json());
+    if (!r.ok) throw new Error(r.error);
+    if (!r.rows.length){ box.innerHTML = '<div class="empty">缺失表目前沒有資料。</div>'; return; }
+    box.innerHTML = r.rows.map(x => `<div class="rec">
+      <div><div class="t">序號 ${esc(x.serial)}・${esc(x.dist)}</div><div class="s">${esc(x.address)}｜${esc(x.type)}</div></div>
+      <span class="st ${x.hasFix ? 'ok' : 'pend'}">${x.hasFix ? '已改善' : '待改善'}</span>
+      <div class="acts"><button class="btn ${x.hasFix ? 'ghost' : ''} small" type="button" data-imp="${esc(x.serial)}">${x.hasFix ? '重拍改善照片' : '補改善照片'}</button></div>
+    </div>`).join('');
+  } catch(e){ box.innerHTML = `<div class="empty" style="color:var(--warn)">讀取失敗：${esc(e.message || e)}</div>`; }
+}
+$('reload').addEventListener('click', loadRemote);
+$('remote').addEventListener('click', e => {
+  const b = e.target.closest('[data-imp]'); if (!b) return;
+  improveSerial = b.dataset.imp; $('pImprove').click();
+});
+$('pImprove').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f || !improveSerial) return;
+  try {
+    const photoFix = await compress(f);
+    await DB.put({ uid: 'imp-' + improveSerial + '-' + Date.now(), createdAt: Date.now(), action: 'improve', status: 'pending', serial: improveSerial, photoFix, address: '' });
+    toast(`序號 ${improveSerial} 改善照片上傳中…`); refreshBadge(); renderPending();
+    await sync(); loadRemote();
+  } catch(err){ toast('照片讀取失敗，請再試一次'); }
+});
+
+/* ===== 設定 ===== */
+function loadSet(){ const c = cfg(); $('gasUrl').value = c.url; $('token').value = c.token; }
+$('saveSet').addEventListener('click', () => {
+  const u = $('gasUrl').value.trim();
+  if (u && !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(u)){ $('setMsg').textContent = '網址格式應為 https://script.google.com/macros/s/…/exec'; return; }
+  LS.set('gasUrl', u); LS.set('token', $('token').value);
+  $('setMsg').textContent = '已儲存。'; sync();
+});
+$('testSet').addEventListener('click', async () => {
+  const u = $('gasUrl').value.trim(); if (!u){ $('setMsg').textContent = '請先填寫網址'; return; }
+  $('setMsg').textContent = '測試中…';
+  try {
+    const p = await fetch(u + '?action=ping').then(r => r.json());
+    if (!p.ok) throw new Error(p.error);
+    const l = await fetch(`${u}?action=list&limit=1&token=${encodeURIComponent($('token').value)}`).then(r => r.json());
+    $('setMsg').textContent = l.ok ? `連線成功，工作表「${p.sheet}」。` : `連得到後端，但${l.error}`;
+  } catch(e){ $('setMsg').textContent = '連線失敗：' + (e.message || e) + '。請確認部署時「誰可以存取」選「所有人」。'; }
+});
+
+/* ===== 分頁與連線狀態 ===== */
+function show(v){
+  document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.v === v));
+  $('v-form').hidden = v !== 'form'; $('v-list').hidden = v !== 'list'; $('v-set').hidden = v !== 'set';
+  if (v === 'list'){ renderPending(); loadRemote(); }
+  if (v === 'set') loadSet();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => show(b.dataset.v)));
+function net(){ const on = navigator.onLine; $('net').textContent = on ? '已連線' : '離線'; $('net').classList.toggle('off', !on); if (on) sync(); }
+addEventListener('online', net); addEventListener('offline', net);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
+net(); refreshBadge();
+if (!cfg().url) setTimeout(() => toast('第一次使用請到「設定」填寫 GAS 網址', 5000), 600);
+
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+</script>
+</body>
+</html>
