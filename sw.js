@@ -1,5 +1,5 @@
 // 空樹穴填報 PWA — 離線快取（只快取本站檔案；送往 Google Apps Script 的請求一律走網路）
-const CACHE = 'treepit-v1.0';
+const CACHE = 'treepit-v1.3';
 const SHELL = ['./', './index.html', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

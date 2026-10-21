@@ -56,7 +56,7 @@ textarea{min-height:76px;resize:vertical}
 .filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .coords{font-family:var(--mono);font-size:13px;color:var(--muted)}
 .toast{position:fixed;left:16px;right:16px;bottom:calc(80px + env(safe-area-inset-bottom,0px));max-width:600px;margin:0 auto;background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:8px;z-index:20;font-size:15px}
-nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding-bottom:env(safe-area-inset-bottom,0px);z-index:10}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px);z-index:10}
 nav.tabs button{font:inherit;font-size:14px;background:none;border:0;color:var(--muted);padding:10px 4px 12px;cursor:pointer;position:relative}
 nav.tabs button[aria-selected=true]{color:var(--pine);font-weight:700;box-shadow:inset 0 3px 0 var(--pine)}
 .badge{display:inline-block;min-width:20px;padding:0 6px;border-radius:999px;background:var(--warn);color:#fff;font-size:12px;margin-left:4px}
@@ -69,6 +69,32 @@ nav.tabs button[aria-selected=true]{color:var(--pine);font-weight:700;box-shadow
 .acts{grid-column:1/3;display:flex;gap:8px;flex-wrap:wrap}
 h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .empty{color:var(--muted);font-size:14px;padding:6px 0}
+/* 查詢統計 */
+.qgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.qgrid .full{grid-column:1/3}
+.qgrid label{display:block;font-size:13.5px;font-weight:700;margin-bottom:4px}
+.qgrid input[type=date]{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.kpi{border-left:4px solid var(--line);padding:2px 0 2px 10px}
+.kpi b{display:block;font-family:var(--mono);font-size:22px;line-height:1.25;font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--muted)}
+.kpi.k1{border-color:var(--pine)} .kpi.k2{border-color:var(--ok)} .kpi.k3{border-color:var(--warn)} .kpi.k4{border-color:var(--pend)}
+.bars{display:flex;flex-direction:column;gap:9px;margin-top:10px}
+.bar .lab{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.bar .lab span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar .trk{height:10px;background:var(--chip);border-radius:5px;overflow:hidden;margin-top:3px}
+.bar .trk i{display:block;height:100%;background:var(--pine);border-radius:5px}
+.bar.btn-like{cursor:pointer}
+.xt{overflow-x:auto;margin-top:12px}
+.xt table{border-collapse:collapse;font-size:13px;min-width:100%}
+.xt th,.xt td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.xt th:first-child,.xt td:first-child{text-align:left;position:sticky;left:0;background:var(--panel)}
+.xt th{font-weight:700;color:var(--muted);font-size:12.5px}
+.xt td small{color:var(--muted)}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.links a{font-size:13.5px;color:var(--pine);border:1px solid var(--line);border-radius:6px;padding:4px 10px;text-decoration:none}
+.meta{font-size:12.5px;color:var(--muted)}
+
 </style>
 </head>
 <body>
@@ -115,7 +141,9 @@ h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;alig
         <div class="photo">
           <div class="thumb" id="thBad">尚未拍照</div>
           <div class="view" style="gap:6px">
-            <span class="btn filebtn">拍照 / 選照片<input type="file" id="pBad" accept="image/*" capture="environment" aria-label="缺失照片"></span>
+            <span class="btn filebtn">拍照<input type="file" id="pBad" accept="image/*" capture="environment" aria-label="缺失照片：拍照"></span>
+            <span class="btn ghost filebtn">從相簿選<input type="file" id="pBadG" accept="image/*" aria-label="缺失照片：從相簿選"></span>
+            <span class="meta" id="tBad"></span>
             <button type="button" class="btn ghost small" id="xBad" hidden>移除</button>
           </div>
         </div>
@@ -126,7 +154,9 @@ h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;alig
         <div class="photo">
           <div class="thumb" id="thFix">無</div>
           <div class="view" style="gap:6px">
-            <span class="btn ghost filebtn">拍照 / 選照片<input type="file" id="pFix" accept="image/*" capture="environment" aria-label="改善照片"></span>
+            <span class="btn ghost filebtn">拍照<input type="file" id="pFix" accept="image/*" capture="environment" aria-label="改善照片：拍照"></span>
+            <span class="btn ghost filebtn">從相簿選<input type="file" id="pFixG" accept="image/*" aria-label="改善照片：從相簿選"></span>
+            <span class="meta" id="tFix"></span>
             <button type="button" class="btn ghost small" id="xFix" hidden>移除</button>
           </div>
         </div>
@@ -163,6 +193,7 @@ h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;alig
       <div class="hint" style="margin-top:0">讀取雲端試算表內最近 50 筆，含其他組員填報的。</div>
       <div id="remote"><div class="empty">切換到此頁時讀取。</div></div>
       <input type="file" id="pImprove" accept="image/*" capture="environment" hidden>
+      <input type="file" id="pImproveG" accept="image/*" hidden>
     </div>
   </section>
 
@@ -185,7 +216,62 @@ h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;alig
     </div>
     <div class="card hint" style="margin:0">
       照片會先在手機壓縮成長邊 1600 像素再上傳，存在雲端硬碟「空樹穴巡查照片」資料夾，試算表的照片欄會直接顯示縮圖。<br>
-      版本 1.0
+      版本 1.3
+    </div>
+  </section>
+  <!-- 查詢統計 -->
+  <section class="view" id="v-query" hidden>
+    <div class="card">
+      <h2>反向查詢 <button class="btn ghost small" id="qReload" type="button">更新資料</button></h2>
+      <div class="qgrid">
+        <div class="full">
+          <label for="qKey">關鍵字</label>
+          <input type="text" id="qKey" placeholder="地址、路名、樹穴編號、序號、備註">
+        </div>
+        <div><label for="qDist">行政區</label><select id="qDist"><option value="">全部</option></select></div>
+        <div><label for="qType">缺失種類</label><select id="qType"><option value="">全部</option></select></div>
+        <div><label for="qFix">改善狀態</label>
+          <select id="qFix"><option value="">全部</option><option value="待改善">待改善</option><option value="已改善">已改善</option></select></div>
+        <div><label for="qRep">填報人</label><select id="qRep"><option value="">全部</option></select></div>
+        <div><label for="qFrom">巡查日期起</label><input type="date" id="qFrom"></div>
+        <div><label for="qTo">巡查日期迄</label><input type="date" id="qTo"></div>
+      </div>
+      <div class="row" style="margin-top:10px;justify-content:space-between">
+        <button class="btn ghost small" id="qClear" type="button">清除條件</button>
+        <span class="meta" id="qMeta"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="kpis">
+        <div class="kpi k1"><b id="kN">–</b><span id="kNs">符合筆數</span></div>
+        <div class="kpi k2"><b id="kFix">–</b><span id="kFixs">已改善</span></div>
+        <div class="kpi k3"><b id="kTodo">–</b><span id="kTodos">待改善</span></div>
+        <div class="kpi k4"><b id="kRoad">–</b><span>涉及路段數</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>分類統計</h2>
+      <div class="qgrid">
+        <div><label for="qBy">分類依據</label><select id="qBy"></select></div>
+        <div><label for="qBy2">交叉比對</label><select id="qBy2"></select></div>
+      </div>
+      <div class="bars" id="qBars"></div>
+      <div class="xt" id="qXt" hidden></div>
+      <div class="hint">百分比以目前查詢結果為分母。點一列分類可直接加入篩選條件。</div>
+      <div class="btnrow row" style="margin-top:10px">
+        <button class="btn small" id="qCopy" type="button">複製統計結果</button>
+        <button class="btn ghost small" id="qExport" type="button">匯出 Excel（含照片）</button>
+        <span class="meta" id="qCopied" aria-live="polite"></span>
+      </div>
+      <textarea id="qOut" hidden readonly style="margin-top:8px;min-height:120px;font-family:var(--mono);font-size:12.5px" aria-label="統計結果文字"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>查詢結果 <span class="meta" id="qCount"></span></h2>
+      <div id="qList"></div>
+      <button class="btn ghost small" id="qMore" type="button" hidden>顯示更多</button>
     </div>
   </section>
 </main>
@@ -193,6 +279,7 @@ h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;alig
 <nav class="tabs" role="tablist">
   <button role="tab" data-v="form" aria-selected="true">填報</button>
   <button role="tab" data-v="list" aria-selected="false">紀錄<span class="badge" id="badge" hidden>0</span></button>
+  <button role="tab" data-v="query" aria-selected="false">查詢統計</button>
   <button role="tab" data-v="set" aria-selected="false">設定</button>
 </nav>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -245,18 +332,29 @@ async function compress(file, max = 1600, q = 0.82){
 const photos = { bad: null, fix: null };
 let loc = null;
 
-function bindPhoto(inputId, thumbId, clearId, key, emptyText){
-  $(inputId).addEventListener('change', async e => {
+/* 相簿照片顯示拍攝時間，提醒不要選到舊照片（以檔案時間為準） */
+function photoTimeNote(f, fromLib){
+  if (!fromLib || !f.lastModified) return '';
+  const age = (Date.now() - f.lastModified) / 86400000;
+  return `照片時間 ${fmtTime(f.lastModified)}` + (age > 3 ? `（${Math.floor(age)} 天前，請確認是本次巡查）` : '');
+}
+function bindPhoto(inputIds, thumbId, clearId, timeId, key, emptyText){
+  inputIds.forEach((inputId, i) => $(inputId).addEventListener('change', async e => {
     const f = e.target.files[0]; if (!f) return;
     $(thumbId).textContent = '處理中…';
-    try { photos[key] = await compress(f); $(thumbId).innerHTML = `<img alt="" src="${photos[key]}">`; $(clearId).hidden = false; }
-    catch(err){ $(thumbId).textContent = emptyText; toast('照片讀取失敗，請換一張再試'); }
+    try {
+      photos[key] = await compress(f);
+      $(thumbId).innerHTML = `<img alt="" src="${photos[key]}">`; $(clearId).hidden = false;
+      const note = photoTimeNote(f, i === 1); $(timeId).textContent = note;
+      $(timeId).style.color = /天前/.test(note) ? 'var(--warn)' : '';
+    }
+    catch(err){ $(thumbId).textContent = emptyText; toast('照片讀取失敗，請換一張再試（HEIC 格式請改用拍照或先轉成 JPG）', 4500); }
     e.target.value = '';
-  });
-  $(clearId).addEventListener('click', () => { photos[key] = null; $(thumbId).textContent = emptyText; $(clearId).hidden = true; });
+  }));
+  $(clearId).addEventListener('click', () => { photos[key] = null; $(thumbId).textContent = emptyText; $(clearId).hidden = true; $(timeId).textContent = ''; });
 }
-bindPhoto('pBad', 'thBad', 'xBad', 'bad', '尚未拍照');
-bindPhoto('pFix', 'thFix', 'xFix', 'fix', '無');
+bindPhoto(['pBad', 'pBadG'], 'thBad', 'xBad', 'tBad', 'bad', '尚未拍照');
+bindPhoto(['pFix', 'pFixG'], 'thFix', 'xFix', 'tFix', 'fix', '無');
 
 $('dist').value = LS.get('dist', '');
 $('reporter').value = LS.get('reporter', '');
@@ -396,16 +494,17 @@ async function loadRemote(){
     box.innerHTML = r.rows.map(x => `<div class="rec">
       <div><div class="t">序號 ${esc(x.serial)}・${esc(x.dist)}</div><div class="s">${esc(x.address)}｜${esc(x.type)}</div></div>
       <span class="st ${x.hasFix ? 'ok' : 'pend'}">${x.hasFix ? '已改善' : '待改善'}</span>
-      <div class="acts"><button class="btn ${x.hasFix ? 'ghost' : ''} small" type="button" data-imp="${esc(x.serial)}">${x.hasFix ? '重拍改善照片' : '補改善照片'}</button></div>
+      <div class="acts"><button class="btn ${x.hasFix ? 'ghost' : ''} small" type="button" data-imp="${esc(x.serial)}" data-src="cam">${x.hasFix ? '重拍改善照片' : '拍改善照片'}</button>
+        <button class="btn ghost small" type="button" data-imp="${esc(x.serial)}" data-src="lib">從相簿選</button></div>
     </div>`).join('');
   } catch(e){ box.innerHTML = `<div class="empty" style="color:var(--warn)">讀取失敗：${esc(e.message || e)}</div>`; }
 }
 $('reload').addEventListener('click', loadRemote);
 $('remote').addEventListener('click', e => {
   const b = e.target.closest('[data-imp]'); if (!b) return;
-  improveSerial = b.dataset.imp; $('pImprove').click();
+  improveSerial = b.dataset.imp; $(b.dataset.src === 'lib' ? 'pImproveG' : 'pImprove').click();
 });
-$('pImprove').addEventListener('change', async e => {
+const onImprove = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f || !improveSerial) return;
   try {
     const photoFix = await compress(f);
@@ -413,7 +512,9 @@ $('pImprove').addEventListener('change', async e => {
     toast(`序號 ${improveSerial} 改善照片上傳中…`); refreshBadge(); renderPending();
     await sync(); loadRemote();
   } catch(err){ toast('照片讀取失敗，請再試一次'); }
-});
+};
+$('pImprove').addEventListener('change', onImprove);
+$('pImproveG').addEventListener('change', onImprove);
 
 /* ===== 設定 ===== */
 function loadSet(){ const c = cfg(); $('gasUrl').value = c.url; $('token').value = c.token; }
@@ -434,10 +535,181 @@ $('testSet').addEventListener('click', async () => {
   } catch(e){ $('setMsg').textContent = '連線失敗：' + (e.message || e) + '。請確認部署時「誰可以存取」選「所有人」。'; }
 });
 
+
+/* ===== 查詢統計 ===== */
+const DIMS = {
+  dist:   { name: '行政區',   get: r => r.dist || '（未填）' },
+  type:   { name: '缺失種類', get: r => r.type || '（未填）' },
+  fix:    { name: '改善狀態', get: r => r.fix ? '已改善' : '待改善' },
+  road:   { name: '路名',     get: r => r.road || '（無法判讀）' },
+  rep:    { name: '填報人',   get: r => r.reporter || '（未填）' },
+  day:    { name: '巡查日期', get: r => r.date ? r.date.slice(0, 10) : '（無日期）' },
+  week:   { name: '巡查週次', get: r => r.date ? weekLabel(r.date) : '（無日期）' },
+  photo:  { name: '缺失照片', get: r => r.bad ? '有照片' : '缺照片' },
+};
+let QROWS = [], QSHOW = 30, QUPDATED = '';
+const pct = (a, b) => b ? (a / b * 100) : 0;
+const p1 = x => (Math.round(x * 10) / 10).toFixed(1) + '%';
+
+function roadOf(addr){
+  const a = String(addr || '').replace(/^(臺北市|台北市)/, '').replace(/^\S{1,3}區/, '');
+  const m = a.match(/([一-鿿]{1,6}?(?:大道|路|街))([一二三四五六七八九十]段)?/);
+  return m ? m[1] + (m[2] || '') : '';
+}
+function weekLabel(d){
+  const t = new Date(d.slice(0, 10) + 'T00:00:00'); const day = (t.getDay() + 6) % 7;
+  const mon = new Date(t); mon.setDate(t.getDate() - day); const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const f = x => `${x.getMonth() + 1}/${x.getDate()}`; return `${f(mon)}–${f(sun)}`;
+}
+
+function setQData(rows, updated){
+  QROWS = rows.map(r => Object.assign({}, r, { road: roadOf(r.address), date: r.date || '' }));
+  QUPDATED = updated;
+  const opts = (id, vals) => { const el = $(id), cur = el.value;
+    el.innerHTML = '<option value="">全部</option>' + [...new Set(vals)].filter(Boolean).sort().map(v => `<option>${esc(v)}</option>`).join('');
+    el.value = [...el.options].some(o => o.value === cur) ? cur : ''; };
+  opts('qDist', QROWS.map(r => r.dist)); opts('qType', QROWS.map(r => r.type)); opts('qRep', QROWS.map(r => r.reporter));
+  runQuery();
+}
+
+async function loadQuery(force){
+  const cache = LS.get('qcache', null);
+  if (cache && !QROWS.length) setQData(cache.rows, cache.updated);
+  const { url, token } = cfg();
+  if (!url){ $('qMeta').textContent = '請先到「設定」填寫 GAS 網址。'; return; }
+  if (!navigator.onLine){ $('qMeta').textContent = cache ? `離線，顯示 ${fmtTime(cache.updated)} 的資料` : '離線且沒有暫存資料'; return; }
+  if (!force && cache && Date.now() - new Date(cache.updated).getTime() < 60000) return;
+  $('qMeta').textContent = '讀取中…';
+  try {
+    const r = await fetch(`${url}?action=query&token=${encodeURIComponent(token)}`).then(r => r.json());
+    if (!r.ok) throw new Error(r.error);
+    LS.set('qcache', { rows: r.rows, updated: r.updated });
+    setQData(r.rows, r.updated);
+  } catch(e){ $('qMeta').textContent = '讀取失敗：' + (e.message || e) + (cache ? '，顯示暫存資料' : ''); }
+}
+
+function filtered(){
+  const key = $('qKey').value.trim().toLowerCase(), d = $('qDist').value, t = $('qType').value, fx = $('qFix').value,
+        rep = $('qRep').value, from = $('qFrom').value, to = $('qTo').value;
+  return QROWS.filter(r => {
+    if (d && r.dist !== d) return false;
+    if (t && r.type !== t) return false;
+    if (fx && DIMS.fix.get(r) !== fx) return false;
+    if (rep && r.reporter !== rep) return false;
+    if ((from || to) && !r.date) return false;
+    if (from && r.date.slice(0, 10) < from) return false;
+    if (to && r.date.slice(0, 10) > to) return false;
+    if (key){
+      const hay = [r.serial, r.address, r.road, r.holeId, r.remark, r.dist, r.type, r.reporter].join(' ').toLowerCase();
+      if (!key.split(/\s+/).every(k => hay.includes(k))) return false;
+    }
+    return true;
+  });
+}
+
+function group(rows, dim){
+  const m = new Map(); for (const r of rows){ const k = DIMS[dim].get(r); m.set(k, (m.get(k) || 0) + 1); }
+  return [...m.entries()].sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0]), 'zh-Hant'));
+}
+
+function runQuery(){
+  const rows = filtered(), N = rows.length, ALL = QROWS.length;
+  const nFix = rows.filter(r => r.fix).length;
+  $('kN').textContent = N; $('kNs').textContent = `符合筆數（全部 ${ALL} 筆的 ${p1(pct(N, ALL))}）`;
+  $('kFix').textContent = p1(pct(nFix, N)); $('kFixs').textContent = `已改善 ${nFix} 筆`;
+  $('kTodo').textContent = p1(pct(N - nFix, N)); $('kTodos').textContent = `待改善 ${N - nFix} 筆`;
+  $('kRoad').textContent = new Set(rows.map(r => r.road).filter(Boolean)).size;
+  if (QUPDATED) $('qMeta').textContent = `資料時間 ${fmtTime(QUPDATED)}`;
+
+  const by = $('qBy').value, by2 = $('qBy2').value, g = group(rows, by);
+  $('qBars').innerHTML = g.length ? g.map(([k, n]) => `<div class="bar btn-like" data-k="${esc(k)}" tabindex="0" role="button">
+      <div class="lab"><span>${esc(k)}</span><span>${n} 筆・${p1(pct(n, N))}</span></div>
+      <div class="trk"><i style="width:${pct(n, g[0][1])}%"></i></div></div>`).join('') : '<div class="empty">沒有符合的資料。</div>';
+
+  const xt = $('qXt');
+  if (by2 && by2 !== by && N){
+    const cols = group(rows, by2).map(x => x[0]);
+    const cell = (a, b) => rows.filter(r => DIMS[by].get(r) === a && DIMS[by2].get(r) === b).length;
+    xt.innerHTML = `<table><thead><tr><th>${DIMS[by].name} ＼ ${DIMS[by2].name}</th>${cols.map(c => `<th>${esc(c)}</th>`).join('')}<th>合計</th></tr></thead><tbody>
+      ${g.map(([k, n]) => `<tr><td>${esc(k)}</td>${cols.map(c => { const v = cell(k, c); return `<td>${v ? v + ' <small>' + p1(pct(v, n)) + '</small>' : '–'}</td>`; }).join('')}<td><b>${n}</b></td></tr>`).join('')}
+      <tr><td><b>合計</b></td>${cols.map(c => { const v = rows.filter(r => DIMS[by2].get(r) === c).length; return `<td><b>${v}</b> <small>${p1(pct(v, N))}</small></td>`; }).join('')}<td><b>${N}</b></td></tr>
+      </tbody></table><div class="hint">格內百分比＝佔該列合計的比例。</div>`;
+    xt.hidden = false;
+  } else xt.hidden = true;
+
+  $('qCount').textContent = `${N} 筆`;
+  const list = rows.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '') || Number(b.serial) - Number(a.serial));
+  $('qList').innerHTML = list.length ? list.slice(0, QSHOW).map(r => `<div class="rec">
+      <div><div class="t">序號 ${esc(r.serial)}・${esc(r.dist)}</div>
+        <div class="s">${esc(r.address)}</div>
+        <div class="s">${esc(r.type)}${r.holeId ? '｜樹穴 ' + esc(r.holeId) : ''}${r.reporter ? '｜' + esc(r.reporter) : ''}${r.date ? '｜' + esc(r.date) : ''}</div></div>
+      <span class="st ${r.fix ? 'ok' : 'pend'}">${r.fix ? '已改善' : '待改善'}</span>
+      <div class="acts links">
+        ${r.bad ? `<a href="${esc(r.bad)}" target="_blank" rel="noopener">缺失照片</a>` : ''}
+        ${r.fix ? `<a href="${esc(r.fix)}" target="_blank" rel="noopener">改善照片</a>` : ''}
+        <a href="https://www.google.com/maps/search/?api=1&query=${r.lat && r.lng ? r.lat + ',' + r.lng : encodeURIComponent(r.address)}" target="_blank" rel="noopener">地圖</a>
+      </div></div>`).join('') : '<div class="empty">沒有符合的資料。</div>';
+  $('qMore').hidden = list.length <= QSHOW;
+  $('qOut').hidden = true;
+}
+
+function initQuery(){
+  const opt = Object.entries(DIMS).map(([k, d]) => `<option value="${k}">${d.name}</option>`).join('');
+  $('qBy').innerHTML = opt; $('qBy2').innerHTML = '<option value="">不交叉</option>' + opt;
+  $('qBy').value = LS.get('qBy', 'dist'); $('qBy2').value = LS.get('qBy2', 'fix');
+  ['qDist', 'qType', 'qFix', 'qRep', 'qFrom', 'qTo'].forEach(id => $(id).addEventListener('change', () => { QSHOW = 30; runQuery(); }));
+  let tmr; $('qKey').addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(() => { QSHOW = 30; runQuery(); }, 250); });
+  ['qBy', 'qBy2'].forEach(id => $(id).addEventListener('change', () => { LS.set(id, $(id).value); runQuery(); }));
+  $('qReload').addEventListener('click', () => loadQuery(true));
+  $('qMore').addEventListener('click', () => { QSHOW += 30; runQuery(); });
+  $('qClear').addEventListener('click', () => { ['qKey', 'qDist', 'qType', 'qFix', 'qRep', 'qFrom', 'qTo'].forEach(id => $(id).value = ''); QSHOW = 30; runQuery(); });
+  const pickBar = el => {
+    const k = el.dataset.k, by = $('qBy').value;
+    const map = { dist: 'qDist', type: 'qType', fix: 'qFix', rep: 'qRep' };
+    if (map[by] && [...$(map[by]).options].some(o => o.value === k)) $(map[by]).value = k;
+    else if (by === 'road' && k !== '（無法判讀）') $('qKey').value = k;
+    else if (by === 'day' && /^\d{4}-/.test(k)) { $('qFrom').value = k; $('qTo').value = k; }
+    else return;
+    QSHOW = 30; runQuery(); toast(`已篩選：${DIMS[by].name}＝${k}`);
+  };
+  $('qBars').addEventListener('click', e => { const b = e.target.closest('.bar'); if (b) pickBar(b); });
+  $('qBars').addEventListener('keydown', e => { const b = e.target.closest('.bar'); if (b && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); pickBar(b); } });
+  $('qExport').addEventListener('click', async () => {
+    const { url, token } = cfg(), btn = $('qExport'), msg = $('qCopied');
+    if (!url || !navigator.onLine){ toast('需要網路並設定 GAS 網址'); return; }
+    btn.disabled = true; msg.textContent = '匯出中，照片多時約需 1～3 分鐘…';
+    try {
+      const r = await fetch(`${url}?action=export&token=${encodeURIComponent(token)}`).then(r => r.json());
+      if (!r.ok) throw new Error(r.error);
+      msg.innerHTML = `已匯出 ${r.photos} 張照片${r.failed ? `（${r.failed} 張失敗）` : ''}：<a href="${esc(r.download)}" target="_blank" rel="noopener">下載 .xlsx</a>｜<a href="${esc(r.url)}" target="_blank" rel="noopener">在雲端硬碟開啟</a>`;
+    } catch(e){ msg.textContent = '匯出失敗：' + (e.message || e); }
+    finally { btn.disabled = false; }
+  });
+  $('qCopy').addEventListener('click', () => {
+    const rows = filtered(), N = rows.length, by = $('qBy').value, by2 = $('qBy2').value;
+    const cond = [['行政區', $('qDist').value], ['缺失種類', $('qType').value], ['改善狀態', $('qFix').value], ['填報人', $('qRep').value],
+      ['關鍵字', $('qKey').value.trim()], ['日期', ($('qFrom').value || $('qTo').value) ? `${$('qFrom').value || '…'}～${$('qTo').value || '…'}` : '']]
+      .filter(x => x[1]).map(x => x.join('：')).join('，') || '全部資料';
+    const nFix = rows.filter(r => r.fix).length;
+    const lines = [`空樹穴巡查缺失統計（${new Date().toLocaleDateString('zh-TW')}）`, `條件：${cond}`,
+      `符合 ${N} 筆，已改善 ${nFix} 筆（${p1(pct(nFix, N))}），待改善 ${N - nFix} 筆（${p1(pct(N - nFix, N))}）`, '', `依${DIMS[by].name}：`];
+    for (const [k, n] of group(rows, by)){
+      let line = `・${k}　${n} 筆（${p1(pct(n, N))}）`;
+      if (by2 && by2 !== by) line += '　' + group(rows.filter(r => DIMS[by].get(r) === k), by2).map(([k2, n2]) => `${k2} ${n2}`).join('、');
+      lines.push(line);
+    }
+    const txt = lines.join('\n'), out = $('qOut'); out.value = txt;
+    const fb = () => { out.hidden = false; out.select(); $('qCopied').textContent = '已選取文字，請手動複製'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => { $('qCopied').textContent = '已複製，可貼到群組或公文'; }, fb); else fb();
+  });
+}
+initQuery();
+
 /* ===== 分頁與連線狀態 ===== */
 function show(v){
   document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.v === v));
-  $('v-form').hidden = v !== 'form'; $('v-list').hidden = v !== 'list'; $('v-set').hidden = v !== 'set';
+  $('v-form').hidden = v !== 'form'; $('v-list').hidden = v !== 'list'; $('v-set').hidden = v !== 'set'; $('v-query').hidden = v !== 'query';
+  if (v === 'query') loadQuery(false);
   if (v === 'list'){ renderPending(); loadRemote(); }
   if (v === 'set') loadSet();
   window.scrollTo(0, 0);
